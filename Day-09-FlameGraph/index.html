@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevPulse - Latency Flame-Graph Inspector</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- React & Babel via CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        function LatencyFlameGraph() {
+            const telemetry = {
+                target: "https://api.github.com/events",
+                metrics: {
+                    dnsLookup: 153.44,
+                    tcpHandshake: 100.61,
+                    tlsHandshake: 108.46,
+                    ttfb: 98.29
+                }
+            };
+
+            const total = Object.values(telemetry.metrics).reduce((a, b) => a + b, 0);
+            const getPercentage = (val) => ((val / total) * 100).toFixed(1);
+
+            return (
+                <main class="page-container">
+                    <article className="dashboard-card">
+                        <header className="header">
+                            <div className="title">
+                                <span className="pulse-indicator"></span>
+                                DevPulse Flame-Graph Inspector
+                            </div>
+                            <span className="endpoint-badge">{telemetry.target}</span>
+                        </header>
+
+                        <p className="subtitle">
+                            Visualizing HTTP Socket Lifecycle Waterfall & Time-to-First-Byte Overhead:
+                        </p>
+
+                        {/* Stacked Flame-Graph Waterfall Bar */}
+                        <div className="flame-container">
+                            <div 
+                                className="flame-segment dns" 
+                                style={{ width: `${getPercentage(telemetry.metrics.dnsLookup)}%` }}
+                                title={`DNS Lookup: ${telemetry.metrics.dnsLookup}ms`}>
+                                {getPercentage(telemetry.metrics.dnsLookup)}%
+                            </div>
+                            <div 
+                                className="flame-segment tcp" 
+                                style={{ width: `${getPercentage(telemetry.metrics.tcpHandshake)}%` }}
+                                title={`TCP Handshake: ${telemetry.metrics.tcpHandshake}ms`}>
+                                {getPercentage(telemetry.metrics.tcpHandshake)}%
+                            </div>
+                            <div 
+                                className="flame-segment tls" 
+                                style={{ width: `${getPercentage(telemetry.metrics.tlsHandshake)}%` }}
+                                title={`TLS Negotiation: ${telemetry.metrics.tlsHandshake}ms`}>
+                                {getPercentage(telemetry.metrics.tlsHandshake)}%
+                            </div>
+                            <div 
+                                className="flame-segment ttfb" 
+                                style={{ width: `${getPercentage(telemetry.metrics.ttfb)}%` }}
+                                title={`TTFB: ${telemetry.metrics.ttfb}ms`}>
+                                {getPercentage(telemetry.metrics.ttfb)}%
+                            </div>
+                        </div>
+
+                        {/* Metrics Breakdown Grid */}
+                        <section className="metrics-grid">
+                            <div className="metric-tile tile-dns">
+                                <div className="metric-label">DNS Lookup</div>
+                                <div className="metric-value">{telemetry.metrics.dnsLookup} ms</div>
+                            </div>
+                            <div className="metric-tile tile-tcp">
+                                <div className="metric-label">TCP Handshake</div>
+                                <div className="metric-value">{telemetry.metrics.tcpHandshake} ms</div>
+                            </div>
+                            <div className="metric-tile tile-tls">
+                                <div className="metric-label">TLS Negotiation</div>
+                                <div className="metric-value">{telemetry.metrics.tlsHandshake} ms</div>
+                            </div>
+                            <div className="metric-tile tile-ttfb">
+                                <div className="metric-label">Server TTFB</div>
+                                <div className="metric-value">{telemetry.metrics.ttfb} ms</div>
+                            </div>
+                        </section>
+
+                        <footer className="total-banner">
+                            <span>Total Connection Duration</span>
+                            <strong>{total.toFixed(2)} ms</strong>
+                        </footer>
+                    </article>
+                </main>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<LatencyFlameGraph />);
+    </script>
+</body>
+</html>
