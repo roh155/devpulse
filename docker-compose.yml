@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  devpulse-telemetry:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: devpulse-telemetry-engine
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - SHARED_SECRET=devpulse_super_secret_webhook_key_2026
+    networks:
+      - devpulse-network
+
+networks:
+  devpulse-network:
+    driver: bridge
